@@ -5,7 +5,7 @@ permissions:
   contents: write
 jobs:
   render:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
@@ -14,6 +14,9 @@ jobs:
           node-version: 20
       - name: Unpack project
         run: unzip -q -o "$(ls *.zip | head -1)"
+      - name: Use video.json from the repo root (if present)
+        run: |
+          if [ -f video.json ]; then cp video.json football-top10/data/video.json; echo "Using video.json"; fi
       - name: System libraries for Chrome
         run: |
           sudo apt-get update
@@ -30,4 +33,4 @@ jobs:
       - name: Publish mp4 to Releases
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "video-${{ github.run_number }}" football-top10/out/top10.mp4 --title "Video ${{ github.run_number }}" --notes "Top 10 transfers"
+        run: gh release create "video-${{ github.run_number }}-${{ github.run_attempt }}" football-top10/out/top10.mp4 --title "Video ${{ github.run_number }}.${{ github.run_attempt }}" --notes "Rendered video"
